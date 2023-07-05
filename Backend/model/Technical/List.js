@@ -7,8 +7,18 @@ const todoSchema = new mongoose.Schema(
       required: true,
     },
     endDate: {
-      type: Date,
+      type: String,
       required: true,
+      validate: {
+        validator: function (value) {
+          // Regular expression pattern for MM/dd/yyyy format
+          const pattern =
+            /^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/(19|20)\d{2}$/;
+
+          return pattern.test(value);
+        },
+        message: "Invalid endDate format. Please use MM/dd/yyyy.",
+      },
     },
     alarmHour: {
       type: String,

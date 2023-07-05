@@ -43,10 +43,11 @@ export const userRegister = AsyncHandler(async (req, res) => {
 export const userLogin = AsyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
+  console.log(req.body, req.headers);
   //Find The User
   const userFound = await User.findOne({ email });
   if (!userFound || userFound.isSuspended) {
-    return res.json({
+    return res.status(400).json({
       message:
         "Wrong email or password. Please try again or contact admin support.",
     });
@@ -56,9 +57,11 @@ export const userLogin = AsyncHandler(async (req, res) => {
   const isMatched = await isPassMatched(password, userFound.password);
 
   if (!isMatched) {
-    return res.json({ message: "Wrong email or password. Please try again." });
+    return res
+      .status(400)
+      .json({ message: "Wrong email or password. Please try again." });
   } else {
-    return res.status(200).json({
+    return res.status(201).json({
       data: generateToken(userFound.id),
       message: "User Logged In Successfully",
     });

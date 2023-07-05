@@ -24,21 +24,87 @@ export const todoCreateItem = AsyncHandler(async (req, res) => {
       const user = await User.findById(req.userAuth._id);
       user.listItems.push(list._id);
       await user.save();
+
+      const listItem = await Todo.findById(list._id)
+        .select(["name", "endDate", "alarmHour", "isCompleted", "todoId"])
+        .populate(["name", "endDate", "alarmHour", "isCompleted", "todoId"]);
+
+      res.status(200).json({
+        status: "success",
+        data: [listItem],
+      });
     } else {
       throw new Error("List cannot about created. Error!");
     }
-
-    res.status(200).json({
-      status: "success",
-      data: list,
-      message: "List Item Created Successfully",
-    });
   }
 });
 
 //@desc Get All List Items for User
-//@route GET /api/v1/todo/getall
+//@route GET /api/v1/todo/getitems
 //@access private User
-export const getAllTodo = AsyncHandler(async (req, res) => {
-  res.status(200).json(res.results);
+export const getSingleTodo = AsyncHandler(async (req, res) => {
+  const todoList = await Todo.find({ createdBy: req.userAuth._id })
+    .select(["name", "endDate", "alarmHour", "isCompleted", "todoId"])
+    .populate(["name", "endDate", "alarmHour", "isCompleted", "todoId"]);
+
+  res.status(200).json({
+    status: "success",
+    data: todoList,
+  });
+});
+
+//@desc Update List Items for User
+//@route GET /api/v1/todo/update
+//@access private User
+export const updateTodo = AsyncHandler(async (req, res) => {
+  const { name, endDate, alarmHour, todoId, isCompleted } = req.body;
+
+  //check if the todo item exists
+  const todo = await Todo.findOne({ todoId: todoId });
+  if (!todo) {
+    throw new Error("Requested To-do Doesn't Exist");
+  }
+
+  const updateListItem = await Todo.findOneAndUpdate(
+    { todoId: todoId },
+    {
+      name,
+      endDate,
+      alarmHour,
+      isCompleted,
+    },
+    {
+      new: true,
+    }
+  );
+
+  const listItem = await Todo.findById(updateListItem._id)
+    .select(["name", "endDate", "alarmHour", "isCompleted", "todoId"])
+    .populate(["name", "endDate", "alarmHour", "isCompleted", "todoId"]);
+
+  res.status(200).json({
+    status: "success",
+    message: "Todo List Updated Successfully",
+    data: [listItem],
+  });
+});
+
+//@desc Delete List Item for User
+//@route Delete /api/v1/todo/:todoId/delete
+//@access private User
+export const deleteTodo = AsyncHandler(async (req, res) => {
+  const listID = req.params.todoID;
+
+  //check if the todo item exists
+  const todo = await Todo.findOneAndDelete({ todoId: listID });
+  if (!todo) {
+    res.status(404);
+    throw new Error("Requested To-do Doesn't Exist");
+  } else {
+    res.status(200).json({
+      status: "success",
+      message: "Todo List Delete Successfully",
+      data: todo,
+    });
+  }
 });

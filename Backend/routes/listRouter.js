@@ -2,9 +2,13 @@ import express from "express";
 import { isAuthenitcated } from "../middleware/isAuth.js";
 import { roleRestriction } from "../middleware/roleRestriction.js";
 import User from "../model/Staff/User.js";
-import { getAllTodo, todoCreateItem } from "../controller/todoCtrl.js";
+import {
+  deleteTodo,
+  getSingleTodo,
+  todoCreateItem,
+  updateTodo,
+} from "../controller/todoCtrl.js";
 import { advancedResults } from "../middleware/advancedResults.js";
-import Todo from "../model/Technical/List.js";
 
 export const todoRouter = express.Router();
 
@@ -15,10 +19,24 @@ todoRouter.post(
   todoCreateItem
 );
 
+//get all list items for a single item
 todoRouter.get(
-  "/getall",
+  "/getitems",
   isAuthenitcated(User),
   roleRestriction("User"),
-  advancedResults(Todo),
-  getAllTodo
+  getSingleTodo
+);
+
+todoRouter.put(
+  "/update",
+  isAuthenitcated(User),
+  roleRestriction("User"),
+  updateTodo
+);
+
+todoRouter.delete(
+  "/:todoID/delete",
+  isAuthenitcated(User),
+  roleRestriction("User"),
+  deleteTodo
 );
