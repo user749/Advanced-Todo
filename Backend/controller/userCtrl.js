@@ -43,7 +43,7 @@ export const userRegister = AsyncHandler(async (req, res) => {
 export const userLogin = AsyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  console.log(req.body, req.headers);
+
   //Find The User
   const userFound = await User.findOne({ email });
   if (!userFound || userFound.isSuspended) {
